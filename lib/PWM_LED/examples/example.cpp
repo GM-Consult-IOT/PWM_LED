@@ -120,12 +120,7 @@ void loop() {
   LED.flash(pattern, 6); // flash dot-dash-dot pattern on LED
   delay(5000);            // keep flashing for 5 seconds
   LED.off();             // turn LED off  
-  
-  // wait for the the LED state to become LED_OFF 
-  while (LED.state() != LED_OFF){
-    vTaskDelay(100/portTICK_PERIOD_MS);
-  }
- 
+
   // halve the brightness
   brightness = (int)((float)(brightness) / 2);
   // roll over brightness at zero

@@ -110,6 +110,8 @@ void PWM_LED::_flash(void){
     #endif // PWM_LED_DEBUG    
     ledcWrite(_PwmChannel,_dutyCycle(0));
     uint8_t len;
+    uint8_t i;   
+    uint32_t timer = millis();
     for (;;){   
         #ifdef PWM_LED_DEBUG
         /* Inspect our own high water mark on entering the task. */
@@ -117,23 +119,30 @@ void PWM_LED::_flash(void){
         Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
         #endif // PWM_LED_DEBUG    
         if (xSemaphoreTake(_flashSemaphore, portMAX_DELAY)){
-             len = _flashPatternLength;       
-            while(_flashPatternLength > 0){
-                for (size_t i = 0; i < len; i++){
+            while(_flashPatternLength > 0){  
+                i = 0;
+                len = _flashPatternLength;              
+                timer = millis();
+                while (i < len && _flashPatternLength > 0){
                     ledcWrite(_PwmChannel,
-                        i % 2 == 0? _dutyCycle(_brightness) :  _dutyCycle(0));                                     
-                    vTaskDelay(_flashPattern[i]/portTICK_PERIOD_MS);
+                            i % 2 == 0? _dutyCycle(_brightness) :  _dutyCycle(0)); 
+                    while (millis()-timer < _flashPattern[i]  && _flashPatternLength > 0){                                                            
+                        vTaskDelay(1/portTICK_PERIOD_MS);
+                    }
+                    timer = millis();
+                    i++;
+                    #ifdef PWM_LED_DEBUG
+                    /* Calling the function will have used some stack space, we would 
+                    therefore now expect uxTaskGetStackHighWaterMark() to return a 
+                    value lower than when it was called on entering the task. */
+                    uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+                    Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
+                    #endif // PWM_LED_DEBUG    
                 }
-                #ifdef PWM_LED_DEBUG
-                /* Calling the function will have used some stack space, we would 
-                therefore now expect uxTaskGetStackHighWaterMark() to return a 
-                value lower than when it was called on entering the task. */
-                uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-                Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
-                #endif // PWM_LED_DEBUG    
             }            
             ledcWrite(_PwmChannel,_dutyCycle(0));                
             _ledState = LED_OFF;
+            i = 0;
         }
         vTaskDelay(1/portTICK_PERIOD_MS);
     }

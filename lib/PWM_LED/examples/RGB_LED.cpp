@@ -22,6 +22,7 @@
 * - the BLUE LED is flashed in a dot-dash-dot (. - .) pattern for 
 *   5 seconds and then turned on.
 *
+*
 * The brightness is halved at the end of every loop and rolls over 
 * at or below 1.
 * 
@@ -119,14 +120,8 @@ void loop() {
   red.off();              // turn RED off
   delay(1000);            // wait one second
   blue.flash(pattern, 6); // flash dot-dash-dot pattern on BLUE
-  delay(5000);            // keep flashing for 5 seconds
+  delay(10000);            // keep flashing for 10 seconds
   blue.off();             // turn BLUE off
-  // wait for the the blue LED state to become LED_OFF to avoid having multiple
-  // LEDs on.
-  while (blue.state()!=LED_OFF){
-    vTaskDelay(100/portTICK_PERIOD_MS);
-  }
-  delay(pattern[0]*2);    // make sure the last dot has completed 
  
   // halve the brightness
   brightness = (int)((float)(brightness) / 2);

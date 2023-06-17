@@ -40,7 +40,7 @@
 #define __PWM_LED_H__
 
 /// Uncomment to see debugging out put on [Serial].
-// #define PWM_LED_DEBUG
+#define PWM_LED_DEBUG
 
 #include <Arduino.h>
 #include <iostream>
