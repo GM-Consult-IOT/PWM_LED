@@ -1,8 +1,8 @@
 {
     "name": "GPIO_LED",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "description": "Control an LED using PWM on GPIO pin.",
-    "keywords": "LED, GPIO, PWM, flash, brightness",
+    "keywords": "LED, GPIO, PWM, flash, brightness, FreeRTOS. non-blocking",
     "repository":
         {
             "type": "git",
