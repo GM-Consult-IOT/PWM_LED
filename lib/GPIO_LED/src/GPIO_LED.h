@@ -68,16 +68,16 @@ class GPIO_LED{
     
     public:
 
-    GPIO_LED(uint16_t color, 
-        uint8_t pin,
-        uint8_t PwmChannel, 
-        int onState = LOW);
+    GPIO_LED(uint8_t pin,
+             uint8_t PwmChannel,
+             int & brightness, 
+             int onState = LOW);
 
     /// @brief Initializes the LED and then turns it OFF.
     /// @param brightness The brightness of the LED when it is turned on. 
     /// Defaults to 0xFF (100%).
     /// @return true if initialization completed without errors.
-    bool begin(int brightness = 0XFF);
+    bool begin();
 
     /// @brief Writes _onState to the GPIO pin and cancels any 
     /// flashing if previously enabled.
@@ -85,15 +85,11 @@ class GPIO_LED{
     /// If the brightness parameter is not passed in or 0 then the current
     /// brightness level will be used.
     /// @param brightness The brightness of the LED when it is on. 
-    void on(int * brightness = NULL);
+    void on();
 
     /// @brief Writes _offState() to the GPIO pin and cancels any 
     /// flashing if previously enabled.
     void off();
-
-    /// @brief The 16-bit color of the LED.
-    /// @return Returns _color.
-    uint16_t color();
 
     /// @brief Flashes the LED at a periodic interval of [periodMS] for a duration
     /// of [durationMs]. If [durationMs] is 0 it will be set to  `periodMs / 2`.
@@ -107,15 +103,7 @@ class GPIO_LED{
     /// @param pattern The cycle period for the flashing of the LED in milliseconds.
     /// @param length the length of the [pattern] array.
     /// @param brightness The brightness of the LED when it is on. 
-    void flash(uint16_t * pattern, uint8_t length, int * brightness = NULL);
-
-    /// @brief Sets the brightness of the LED on a scale of 0X00 to 0XFF (255), 
-    /// where 0xFF is fully on and 0X00 is off.
-    /// 
-    /// If the LED is currently in state LED_ON or LED_FLASHING the brightness will
-    /// be adjusted.
-    /// @param brightness The brightness of the LED.
-    void setBrightness(int brightness);
+    void flash(uint16_t * pattern, uint8_t length);
 
     /// @brief The current state of the LED.
     /// @return Returns the current LED state.
@@ -137,20 +125,22 @@ class GPIO_LED{
 
     /// @brief Private variable holding the on PWM duty cycle of the
     /// LED PWM channel.
-    int _brightness;
+    int & _brightness;
     
     /// @brief The static delegate of [_readSensor]
     /// @param _this NULL
     static void _flashTaskStatic(void* _this);
+
+    /// @brief Private function to create the FreeRTOS semaphore 
+    /// and task.
+    /// @return true if initialization completed without errors.
+    bool _createTask();
 
     /// @brief The period of the LED flashing cycle.
     uint16_t _flashPattern[255];
 
     /// @brief The duration of each flash.
     uint8_t _flashPatternLength = 0;
-
-    /// @brief the 16-bit color of the LED.
-    uint16_t _color;
     
     /// @brief The GPIO pin that the LED is attached to.
     uint8_t _GPIO;
@@ -168,6 +158,9 @@ class GPIO_LED{
     /// consideration of the [brightness] and [onState] values.
     /// @return A dutycycle as 8-bit unsigned integer.
     int _dutyCycle(int brightness);
+
+    /// @brief The pattern to use if the LED is on.
+    uint16_t _onPattern[2] = {250, 0};
 
 };
 

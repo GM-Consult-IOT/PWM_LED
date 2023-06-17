@@ -23,54 +23,42 @@
 
 #include "GPIO_LED.h"
 
-GPIO_LED::GPIO_LED(uint16_t color, 
-        uint8_t pin, 
+#define TASK_STACK_SIZE 0x600
+#define TASK_PRIORITY 10
+
+GPIO_LED::GPIO_LED(uint8_t pin, 
         uint8_t PwmChannel, 
+        int & brightness, 
         int onState):
-            _color(color), 
             _GPIO(pin), 
             _PwmChannel(PwmChannel),
+            _brightness(brightness),
             _onState(bool(onState)){};
 
-bool GPIO_LED::begin(int brightness){
+bool GPIO_LED::begin(){
     ledcSetup(_PwmChannel, GPIO_LED_PWM_FREQ, GPIO_LED_PWM_RESOLUTION);
     ledcAttachPin(_GPIO, _PwmChannel);
     vTaskDelay(100/portTICK_PERIOD_MS);
-    _brightness = brightness;    
+    if (_createTask()){
+        off();
+        return true;        
+    }
+    return false;
+};
+
+bool GPIO_LED::_createTask(){
     _flashSemaphore = xSemaphoreCreateBinary();
     if (_flashSemaphore == NULL){
-        #ifdef GPIO_LED_DEBUG
-        Serial.println("Failed to create flash semaphore");
-        #endif // GPIO_LED_DEBUG
         return false;
-    } else {
-        #ifdef GPIO_LED_DEBUG
-        Serial.println("Flash semaphore created");
-        #endif // GPIO_LED_DEBUG
-    }
+    } 
     if (!xTaskCreate(this->_flashTaskStatic,
-        "FLASH_TASK",
-        4096,
+        "LED_TASK",
+        TASK_STACK_SIZE,
         this,
-        10, 
+        TASK_PRIORITY, 
         &_flashTask)){
-        #ifdef GPIO_LED_DEBUG
-        Serial.println("Failed to create flash task");
-        #endif // GPIO_LED_DEBUG
         return false;
-    } else {
-        #ifdef GPIO_LED_DEBUG
-        Serial.println("Flash task created");
-        #endif // GPIO_LED_DEBUG
-    }
-    // ledcWrite(_PwmChannel, GPIO_LED_PWM_MAX_DUTY_CYCLE/2);
-    #ifdef GPIO_LED_DEBUG
-    Serial.printf("GPIO %u set as PWM output\n", _GPIO);
-    ledcWrite(_PwmChannel, GPIO_LED_PWM_MAX_DUTY_CYCLE);
-    vTaskDelay(5000);
-    #endif // GPIO_LED_DEBUG
-    off();
-    _ledState = LED_OFF;
+    } 
     return true;
 };
 
@@ -78,68 +66,58 @@ LED_State GPIO_LED::state(){
     return _ledState;
 };
 
-void GPIO_LED::setBrightness(int brightness){ 
-    if (_ledState == LED_ON) {
-        return on(&brightness);
-    }
-    _brightness = brightness;   
-}
-
-void GPIO_LED::on(int * brightness){ 
-    _brightness = brightness == NULL? _brightness: brightness[0];
+void GPIO_LED::on(){ 
     xSemaphoreTake(_flashSemaphore,  ( TickType_t ) 1);      
-    _flashPatternLength = 0;   
-    int dutyCycle  = _dutyCycle(_brightness);
-    #ifdef GPIO_LED_DEBUG
-    Serial.printf("Turned on the LED on GPIO %u, dutycycle %X\n",_GPIO, dutyCycle);
-    #endif // GPIO_LED_DEBUG        
-    ledcWrite(_PwmChannel,dutyCycle);
+    _flashPatternLength = 0;       
+    flash(_onPattern,1);
     _ledState = LED_ON;
 };
 
 void GPIO_LED::off(){  
     xSemaphoreTake(_flashSemaphore,  ( TickType_t ) 1);    
-    memset(_flashPattern, 0, sizeof(_flashPattern));
     _flashPatternLength = 0; 
-    #ifdef GPIO_LED_DEBUG
-    Serial.printf("Turned off the LED on GPIO %u, dutycycle %X\n",_GPIO, _dutyCycle(0));
-    #endif // GPIO_LED_DEBUG    
-    ledcWrite(_PwmChannel,_dutyCycle(0));    
     _ledState = LED_OFF;
 }
 
-uint16_t GPIO_LED::color(){
-    return _color;
-};
-
-void GPIO_LED::flash(uint16_t * pattern, uint8_t length, int * brightness ){   
-    _brightness = brightness == NULL? _brightness: brightness[0]; 
-    off();
-    if(length>0){
-        if (length == 1 && pattern[0]>0){
-            on();
-        } else {
-            std::copy(pattern, pattern + length, _flashPattern);
-            _flashPatternLength = length;
-            xSemaphoreGive(_flashSemaphore);
-            _ledState = LED_FLASHING;
-        }
+void GPIO_LED::flash(uint16_t * pattern, uint8_t length){   
+    _flashPatternLength = 0; 
+    if(length>0){    
+        std::copy(pattern, pattern + length, _flashPattern);
+        _flashPatternLength = length;
+        xSemaphoreGive(_flashSemaphore);
+        _ledState = LED_FLASHING;        
     }
 }
 
 void GPIO_LED::_flash(void){
+    #ifdef GPIO_LED_DEBUG
+    UBaseType_t uxHighWaterMark;
+    #endif // GPIO_LED_DEBUG    
     ledcWrite(_PwmChannel,_dutyCycle(0));
+    uint8_t len;
     for (;;){   
+        #ifdef GPIO_LED_DEBUG
+        /* Inspect our own high water mark on entering the task. */
+        uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+        Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
+        #endif // GPIO_LED_DEBUG    
         if (xSemaphoreTake(_flashSemaphore, portMAX_DELAY)){
-            uint8_t len = _flashPatternLength;
-            const uint16_t * pattern = _flashPattern;            
+             len = _flashPatternLength;       
             while(_flashPatternLength > 0){
                 for (size_t i = 0; i < len; i++){
                     ledcWrite(_PwmChannel,
-                        i % 2 == 0? _dutyCycle(0) : _dutyCycle(_brightness));                                     
-                    vTaskDelay(pattern[i]/portTICK_PERIOD_MS);
+                        i % 2 == 0? _dutyCycle(_brightness) :  _dutyCycle(0));                                     
+                    vTaskDelay(_flashPattern[i]/portTICK_PERIOD_MS);
                 }
-            }
+                #ifdef GPIO_LED_DEBUG
+                /* Calling the function will have used some stack space, we would 
+                therefore now expect uxTaskGetStackHighWaterMark() to return a 
+                value lower than when it was called on entering the task. */
+                uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+                Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
+                #endif // GPIO_LED_DEBUG    
+            }            
+            ledcWrite(_PwmChannel,_dutyCycle(0));    
         }
         vTaskDelay(1/portTICK_PERIOD_MS);
     }
