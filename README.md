@@ -1,8 +1,9 @@
 # PWM_LED
-Control an LED directly from a GPIO pin.
+
+Control an LED's state, flashing pattern and brightness using PWM on a GPIO pin.
 
 ## Contents
-- [GPIO\_LED](#gpio_led)
+- [PWM\_LED](#pwm_led)
   - [Contents](#contents)
   - [Overview](#overview)
   - [Usage](#usage)
