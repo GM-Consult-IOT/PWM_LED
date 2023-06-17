@@ -1,7 +1,7 @@
 {
     "name": "GPIO_LED",
     "version": "0.0.1",
-    "description": "Control an LED directly from a GPIO pin.",
+    "description": "Control an LED using PWM on GPIO pin.",
     "keywords": "LED, GPIO, PWM, flash, brightness",
     "repository":
         {

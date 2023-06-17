@@ -1,4 +1,4 @@
-# GPIO_LED
+# PWM_LED
 Control an LED directly from a GPIO pin.
 
 ## Contents
@@ -19,19 +19,19 @@ The PWM output is managed by a FreeRTOS task with a fairly low priority (task pr
 
 ## Usage
 
-*The following example is also in the [examples folder](https://github.com/GM-Consult-IOT/GPIO_LED/tree/main/lib/GPIO_LED/examples).*
+*The following example is also in the [examples folder](https://github.com/GM-Consult-IOT/PWM_LED/tree/main/lib/PWM_LED/examples).*
 
-This sketch demontrates how to control an LED using the GPIO_LED. It also shows how changing the brightness and flashing pattern can be accomplished with very little effort.
+This sketch demontrates how to control an LED using the PWM_LED. It also shows how changing the brightness and flashing pattern can be accomplished with very little effort.
 
-This sketch assumes an LED's anode is directly connected to pin 27. The LED is associated with an instance of the GPIO_LED class and driven by PWM channel 0. 
+This sketch assumes an LED's anode is directly connected to pin 27. The LED is associated with an instance of the PWM_LED class and driven by PWM channel 0. 
 
-The `brightness` is passed by reference to the GPIO_LED instance. Changing the value of `brightness` changes the brightness of the LED. Changing any element of `pattern` changes the flashing pattern of the LED.
+The `brightness` is passed by reference to the PWM_LED instance. Changing the value of `brightness` changes the brightness of the LED. Changing any element of `pattern` changes the flashing pattern of the LED.
 
 The hardware setup is as shown in [this tutorial](https://www.google.com/search?q=random+nerd+pwm&oq=random+nerd+pwm&aqs=edge..69i57j0i546j0i546i649j69i60l2.5334j0j1&sourceid=chrome&ie=UTF-8):
 * the LED cathode is connected to ground via a voltage limiting resistor; and
 * the LED anode is connected to GPIO 16.
 
-The GPIO_LED instance is initialized in the `setup()` routine. To test the hardware, the LED is turned on for 1 second and then dimmed to about 25%.
+The PWM_LED instance is initialized in the `setup()` routine. To test the hardware, the LED is turned on for 1 second and then dimmed to about 25%.
 
 During the loop() task the LED is activated as follows: 
 * the LED is turned on for 2 seconds and then turned off for a second; and
@@ -41,11 +41,9 @@ The brightness is halved at the end of every loop and rolls over at or below 1.
 
 The length of the first and last flash of the pattern is doubled at the end of every loop until they reach 2.5 seconds, at which point they reset to 10mS.
 
+``` C++
 
-``` c++
-
-
-#include <GPIO_LED.h>
+#include <PWM_LED.h>
 
 // Connect LED to pin 16.
 #define LED_PIN GPIO_NUM_16
@@ -62,11 +60,11 @@ The length of the first and last flash of the pattern is doubled at the end of e
 uint16_t pattern[] = {DOT,OFF,DASH,OFF,DOT,BREAK};
 
 /// @brief The variable that holds the brightness value, passed
-/// by reference to the GPIO_LED instance.
+/// by reference to the PWM_LED instance.
 int brightness = 0xff;
 
-/// @brief Instantiate the GPIO_LED instance.
-GPIO_LED LED(LED_PIN, LED_PWM, brightness, HIGH);
+/// @brief Instantiate the PWM_LED instance.
+PWM_LED LED(LED_PIN, LED_PWM, brightness, HIGH);
 
 // get everything ready
 void setup() {

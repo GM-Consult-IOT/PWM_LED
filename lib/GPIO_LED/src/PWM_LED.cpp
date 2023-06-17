@@ -1,6 +1,6 @@
 /*!
 * @file /*!
-* @file GPIO_LED.h
+* @file PWM_LED.h
 *
 * @mainpage Status LED interface for 400 Ocean Series Devices.
 *
@@ -21,12 +21,12 @@
  * 
 */
 
-#include "GPIO_LED.h"
+#include "PWM_LED.h"
 
 #define TASK_STACK_SIZE 0x600
 #define TASK_PRIORITY 10
 
-GPIO_LED::GPIO_LED(uint8_t pin, 
+PWM_LED::PWM_LED(uint8_t pin, 
         uint8_t PwmChannel, 
         int & brightness, 
         int onState):
@@ -35,7 +35,7 @@ GPIO_LED::GPIO_LED(uint8_t pin,
             _brightness(brightness),
             _onState(bool(onState)){};
 
-bool GPIO_LED::begin(){
+bool PWM_LED::begin(){
     ledcSetup(_PwmChannel, GPIO_LED_PWM_FREQ, GPIO_LED_PWM_RESOLUTION);
     ledcAttachPin(_GPIO, _PwmChannel);
     vTaskDelay(100/portTICK_PERIOD_MS);
@@ -46,7 +46,7 @@ bool GPIO_LED::begin(){
     return false;
 };
 
-bool GPIO_LED::_createTask(){
+bool PWM_LED::_createTask(){
     _flashSemaphore = xSemaphoreCreateBinary();
     if (_flashSemaphore == NULL){
         return false;
@@ -62,24 +62,24 @@ bool GPIO_LED::_createTask(){
     return true;
 };
 
-LED_State GPIO_LED::state(){
+LED_State PWM_LED::state(){
     return _ledState;
 };
 
-void GPIO_LED::on(){ 
+void PWM_LED::on(){ 
     xSemaphoreTake(_flashSemaphore,  ( TickType_t ) 1);      
     _flashPatternLength = 0;       
     flash(_onPattern,1);
     _ledState = LED_ON;
 };
 
-void GPIO_LED::off(){  
+void PWM_LED::off(){  
     xSemaphoreTake(_flashSemaphore,  ( TickType_t ) 1);    
     _flashPatternLength = 0; 
     _ledState = LED_OFF;
 }
 
-void GPIO_LED::flash(uint16_t * pattern, uint8_t length){   
+void PWM_LED::flash(uint16_t * pattern, uint8_t length){   
     _flashPatternLength = 0; 
     if(length>0){    
         std::copy(pattern, pattern + length, _flashPattern);
@@ -89,7 +89,7 @@ void GPIO_LED::flash(uint16_t * pattern, uint8_t length){
     }
 }
 
-void GPIO_LED::_flash(void){
+void PWM_LED::_flash(void){
     #ifdef GPIO_LED_DEBUG
     UBaseType_t uxHighWaterMark;
     #endif // GPIO_LED_DEBUG    
@@ -123,11 +123,11 @@ void GPIO_LED::_flash(void){
     }
 };
 
-void GPIO_LED::_flashTaskStatic(void* _this){
-    static_cast<GPIO_LED*>(_this)->_flash();
+void PWM_LED::_flashTaskStatic(void* _this){
+    static_cast<PWM_LED*>(_this)->_flash();
 };
 
 
-int GPIO_LED::_dutyCycle(int brightness){
+int PWM_LED::_dutyCycle(int brightness){
     return _onState == HIGH? brightness: GPIO_LED_PWM_MAX_DUTY_CYCLE - brightness;
 };

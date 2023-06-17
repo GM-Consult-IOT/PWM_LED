@@ -2,18 +2,18 @@
 * @file /*!
 * @file main.cpp
 *
-* @mainpage Sketch to demonstrate the GPIO_LED library.
+* @mainpage Sketch to demonstrate the PWM_LED library.
 *
 * @section intro_sec_Introduction
 *
-* This sketch demontrates how to control an LED using the GPIO_LED. It
+* This sketch demontrates how to control an LED using the PWM_LED. It
 * also shows how changing the brightness and flashing pattern can be
 * accomplished with very little effort.
 *
 * This sketch requires an LED connected to pin 27. The
-* LED is associated with an instance of the GPIO_LED class and
+* LED is associated with an instance of the PWM_LED class and
 * driven by PWM channel 3. The `brightness` is passed by reference 
-* to the GPIO_LED instance. Changing the value of 
+* to the PWM_LED instance. Changing the value of 
 * `brightness` changes the brightness of the LED. Changing any element
 * of `pattern` changes the flashing pattern of the LED.
 *
@@ -22,7 +22,7 @@
 *   resistor; and
 * - The LED anode is connected to GPIO 27.
 *
-* The GPIO_LED instance is initialized in the `setup()` routine. To test 
+* The PWM_LED instance is initialized in the `setup()` routine. To test 
 * the hardware, the LED is turned on for 1 second and then dimmed to 
 * about 25%.
 *
@@ -49,7 +49,7 @@
  * 
 */
 
-#include <GPIO_LED.h>
+#include <PWM_LED.h>
 
 // Connect LED to pin 16.
 #define LED_PIN GPIO_NUM_16
@@ -64,19 +64,19 @@
 uint16_t pattern[] = {DOT,OFF,DASH,OFF,DOT,BREAK};
 
 /// @brief The variable that holds the brightness value, passed
-/// by reference to the GPIO_LED instance.
+/// by reference to the PWM_LED instance.
 int brightness = 0xff;
 
-/// @brief Instantiate the GPIO_LED instance.
+/// @brief Instantiate the PWM_LED instance.
 ///
 /// The hardware setup is as follows: 
 /// - The LED cathode is connected to ground via a voltage 
 ///   limiting resistor.
 /// - The LED anode is connected to GPIO 16.
 /// 
-/// The GPIO_LED instance uses PWM channel 0 and the `brightness`
+/// The PWM_LED instance uses PWM channel 0 and the `brightness`
 /// is passed in by reference. The start-up `brighness` is 100% (0XFF).
-GPIO_LED LED(LED_PIN, LED_PWM, brightness, HIGH);
+PWM_LED LED(LED_PIN, LED_PWM, brightness, HIGH);
 
 // get everything ready
 void setup() {

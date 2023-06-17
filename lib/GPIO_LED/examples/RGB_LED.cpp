@@ -2,18 +2,18 @@
 * @file /*!
 * @file main.cpp
 *
-* @mainpage Sketch to demonstrate the GPIO_LED library.
+* @mainpage Sketch to demonstrate the PWM_LED library.
 *
 * @section intro_sec_Introduction
 *
 * This sketch requires an RGB LED connected to pins 14, 27 and 12. The
-* LEDs are associated with three instances of the GPIO_LED class and
+* LEDs are associated with three instances of the PWM_LED class and
 * driven by PWM channels 2, 3 and 4 respectively. The three LEDs all
-* use the same `brightness` value, passed by reference to the GPIO_LED
+* use the same `brightness` value, passed by reference to the PWM_LED
 * instances. Changing the value of `brightness` changes the brightness
 * of all three LEDs.
 *
-* The GPIO_LED instances are initialized in the `setup()`
+* The PWM_LED instances are initialized in the `setup()`
 * routine and then turned on for 1 second, one after the other.
 *
 * During the loop() task the LEDs are activated as follows:
@@ -41,7 +41,7 @@
  * 
 */
 
-#include <GPIO_LED.h>
+#include <PWM_LED.h>
 
 // Connect 3 LEDs (or an RGB LED) to pins 14, 27 and 12.
 
@@ -62,13 +62,13 @@
 uint16_t pattern[] = {DOT,OFF,DASH,OFF,DOT,BREAK};
 
 /// @brief The variable that holds the brightness value, passed
-/// by reference to the GPIO_LED instance.
+/// by reference to the PWM_LED instance.
 int brightness = 0xff;
 
-// instantiate the GPIO_LED instances.
-GPIO_LED red(LED_RED_PIN, LED_RED_PWM, brightness, HIGH);
-GPIO_LED green( LED_GREEN_PIN, LED_GREEN_PWM, brightness, HIGH);
-GPIO_LED blue(LED_BLUE_PIN, LED_BLUE_PWM, brightness, HIGH);
+// instantiate the PWM_LED instances.
+PWM_LED red(LED_RED_PIN, LED_RED_PWM, brightness, HIGH);
+PWM_LED green( LED_GREEN_PIN, LED_GREEN_PWM, brightness, HIGH);
+PWM_LED blue(LED_BLUE_PIN, LED_BLUE_PWM, brightness, HIGH);
 
 // get everything ready
 void setup() {

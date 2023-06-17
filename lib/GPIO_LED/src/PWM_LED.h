@@ -1,6 +1,6 @@
 /*!
 * @file /*!
-* @file GPIO_LED.h
+* @file PWM_LED.h
 *
 * @mainpage Status LED interface for 400 Ocean Series Devices.
 *
@@ -64,11 +64,11 @@ typedef enum LED_State{
 
 /// @brief Defines the properties of a status LED and exposes 
 /// methods to turn the LED on or off.
-class GPIO_LED{
+class PWM_LED{
     
     public:
 
-    GPIO_LED(uint8_t pin,
+    PWM_LED(uint8_t pin,
              uint8_t PwmChannel,
              int & brightness, 
              int onState = LOW);
