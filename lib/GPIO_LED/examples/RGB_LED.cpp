@@ -16,9 +16,6 @@
 * The GPIO_LED instances are initialized in the `setup()`
 * routine and then turned on for 1 second, one after the other.
 *
-* In the `loop()` task the brightness is decremented in steps of 25.
-* The `brightness` rolls over at 0.
-*
 * During the loop() task the LEDs are activated as follows:
 * - the RED LED is turned on for 1.5 seconds and then turned off.
 * - the GREEN LED is turned on for 1 second and then turned off.
@@ -26,6 +23,12 @@
 *   5 seconds and then turned on.
 *
 *
+* The brightness is halved at the end of every loop and rolls over 
+* at or below 1.
+* 
+* The length of the first and last flash of the pattern is doubled at
+* the end of every loop until they reach 2.5 seconds, at which point they 
+* reset to 10mS.
 * @section author Author
 * 
 * Gerhard Malan for GM Consult Pty Ltd
@@ -102,7 +105,9 @@ void setup() {
 void loop() {  
 
   // print the brightness to the debug port
-  Serial.printf("Brightness is %S percent (%u)\n", String(double(brightness) / 0xff * 100, 0), brightness);
+  Serial.printf("Brightness is %S percent (%u)\n", 
+    String(double(brightness) / 0xff * 100, 0), 
+    brightness);
   
   // do a bit of turning on and off and flashing
   delay(1000);            // wait one second
@@ -117,10 +122,15 @@ void loop() {
   blue.flash(pattern, 6); // flash dot-dash-dot pattern on BLUE
   delay(5000);            // keep flashing for 5 seconds
   blue.off();             // turn BLUE off
+  delay(pattern[0]*2);    // make sure the last dot has completed 
  
-  // decrement the brightness
-  brightness -= 25;
+  // halve the brightness
+  brightness = (int)((float)(brightness) / 2);
+  
   // roll over brightness at zero
-  brightness = brightness < 0 ? 0xff : brightness;
+  brightness = brightness <= 1 ? 0xff : brightness;
+  // double the dot lengths until they are 2.5 seconds long
+  pattern[0] = pattern[0] > 2500? 10: pattern[0] * 2;;
+  pattern[4] = pattern[0];
   
 }

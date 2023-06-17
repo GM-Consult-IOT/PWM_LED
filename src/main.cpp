@@ -6,36 +6,29 @@
 *
 * @section intro_sec_Introduction
 *
-* This sketch demontrates how to control an LED using the GPIO_LED. It
-* also shows how changing the brightness and flashing pattern can be
-* accomplished with very little effort.
+* This sketch requires an RGB LED connected to pins 14, 27 and 12. The
+* LEDs are associated with three instances of the GPIO_LED class and
+* driven by PWM channels 2, 3 and 4 respectively. The three LEDs all
+* use the same `brightness` value, passed by reference to the GPIO_LED
+* instances. Changing the value of `brightness` changes the brightness
+* of all three LEDs.
 *
-* This sketch requires an LED connected to pin 27. The
-* LED is associated with an instance of the GPIO_LED class and
-* driven by PWM channel 3. The `brightness` is passed by reference 
-* to the GPIO_LED instance. Changing the value of 
-* `brightness` changes the brightness of the LED. Changing any element
-* of `pattern` changes the flashing pattern of the LED.
+* The GPIO_LED instances are initialized in the `setup()`
+* routine and then turned on for 1 second, one after the other.
 *
-* The hardware setup is as follows: 
-* - The LED cathode is connected to ground via a voltage limiting 
-*   resistor; and
-* - The LED anode is connected to GPIO 27.
+* During the loop() task the LEDs are activated as follows:
+* - the RED LED is turned on for 1.5 seconds and then turned off.
+* - the GREEN LED is turned on for 1 second and then turned off.
+* - the BLUE LED is flashed in a dot-dash-dot (. - .) pattern for 
+*   5 seconds and then turned on.
 *
-* The GPIO_LED instance is initialized in the `setup()` routine. To test 
-* the hardware, the LED is turned on for 1 second and then dimmed to 
-* about 25%.
-*
-* During the loop() task the LED is activated as follows:
-* - the LED is turned on for 2 seconds and then turned off for a second.
-* - the LED is flashed in a dot-dash-dot (. - .) pattern for 
-*   5 seconds and then turned off.*
 *
 * The brightness is halved at the end of every loop and rolls over 
 * at or below 1.
 * 
 * The length of the first and last flash of the pattern is doubled at
-* the end of every loop until it reaches 2500mS, at which point it resets to 10mS.
+* the end of every loop until they reach 2.5 seconds, at which point they 
+* reset to 10mS.
 * @section author Author
 * 
 * Gerhard Malan for GM Consult Pty Ltd
@@ -43,89 +36,101 @@
  * @section license License
  * 
  * This library is open-source under the BSD 3-Clause license and 
- * LEDistribution and use in source and binary forms, with or without 
+ * redistribution and use in source and binary forms, with or without 
  * modification, are permitted, provided that the license conditions are met.
  * 
 */
 
 #include <GPIO_LED.h>
 
-// Connect LED to pin 27.
-#define LED_PIN GPIO_NUM_27
-#define LED_PWM 3U
+// Connect 3 LEDs (or an RGB LED) to pins 14, 27 and 12.
+
+#define LED_RED_PIN 14U
+#define LED_GREEN_PIN 27U
+#define LED_BLUE_PIN 12U
+
+#define LED_RED_PWM 2
+#define LED_GREEN_PWM 3
+#define LED_BLUE_PWM 4
 
 #define DOT 100U
 #define OFF 100U
 #define DASH 500U
 #define BREAK 1000U
 
-uint16_t dot = DOT;
-
 /// @brief Create a dot - dash - dot flashing pattern
-uint16_t pattern[] = {DOT,OFF,DASH,OFF,dot,BREAK};
+uint16_t pattern[] = {DOT,OFF,DASH,OFF,DOT,BREAK};
 
 /// @brief The variable that holds the brightness value, passed
 /// by reference to the GPIO_LED instance.
 int brightness = 0xff;
 
-/// @brief Instantiate the GPIO_LED instance.
-///
-/// The hardware setup is as follows: 
-/// - The LED cathode is connected to ground via a voltage 
-///   limiting resistor.
-/// - The LED anode is connected to GPIO 27.
-/// 
-/// The GPIO_LED instance uses PWM channel 3 and the `brightness`
-/// is passed in by reference. The start-up `brighness` is 100% (0XFF).
-GPIO_LED LED(LED_PIN, LED_PWM, brightness, HIGH);
+// instantiate the GPIO_LED instances.
+GPIO_LED red(LED_RED_PIN, LED_RED_PWM, brightness, HIGH);
+GPIO_LED green( LED_GREEN_PIN, LED_GREEN_PWM, brightness, HIGH);
+GPIO_LED blue(LED_BLUE_PIN, LED_BLUE_PWM, brightness, HIGH);
 
 // get everything ready
 void setup() {
-
   // set up the debug port
   Serial.begin(115200);
-  
-  // wait for Serial to be initialized
   while (!Serial){
     vTaskDelay(50/portTICK_PERIOD_MS);
   };
   
-  // send handshake
+  // handshake
   Serial.println("Up and running!");
 
-  // initialize the LED, starting the PWM task
-  LED.begin();
+  // initialize the LED instances
+  red.begin();
+  blue.begin();
+  green.begin();
 
-  // test the LED is working
-  LED.on();              // turn on the LED
-  delay (2500);          // keep on for 2.5sec
-  brightness = 75;      // dim to 50%
-  delay(2500);           // wait one second  
-  LED.off();             // turn LED off
+  // test the LEDs are working
+  red.on();
+  delay(500);
+  red.off();
+  green.on();
+  delay (500);
+  green.off();
+  blue.on();
+  delay (500);
+  // set the brightness around 50%
+  brightness = 125;
   Serial.println("setup() done!");
+  delay(1000);            // wait one second  
+  blue.off();             // turn BLUE off
 }
 
 void loop() {  
 
   // print the brightness to the debug port
-  Serial.printf("Brightness is %S percent (%u)\n", String(double(brightness) / 0xff * 100, 0), brightness);
+  Serial.printf("Brightness is %S percent (%u)\n", 
+    String(double(brightness) / 0xff * 100, 0), 
+    brightness);
   
   // do a bit of turning on and off and flashing
   delay(1000);            // wait one second
-  LED.on();             // turn LED on   
-  delay(2000);            // keep LED on for 2 seconds
-  LED.off();            // turn LED off
+  green.on();             // turn GREEN on   
+  delay(2000);            // keep GREEN on for 2 seconds
+  green.off();            // turn GREEN off
   delay(1000);            // wait one second
-  LED.flash(pattern, 6); // flash dot-dash-dot pattern on LED
+  red.on();               // turn RED on
+  delay(2000);            // keep RED on for 2 seconds
+  red.off();              // turn RED off
+  delay(1000);            // wait one second
+  blue.flash(pattern, 6); // flash dot-dash-dot pattern on BLUE
   delay(5000);            // keep flashing for 5 seconds
-  LED.off();             // turn LED off
+  blue.off();             // turn BLUE off
+  delay(pattern[0]*2);    // make sure the last dot has completed 
  
   // halve the brightness
-  brightness -= (int)((float)(brightness) / 2);
-  dot = dot > 2500? 10: dot * 2;
-  pattern[4] = dot;
-  pattern[0] = dot;
+  brightness = (int)((float)(brightness) / 2);
+  
   // roll over brightness at zero
   brightness = brightness <= 1 ? 0xff : brightness;
+  // double the dot lengths until they are 2.5 seconds long
+  pattern[0] = pattern[0] > 2500? 10: pattern[0] * 2;;
+  pattern[4] = pattern[0];
   
 }
