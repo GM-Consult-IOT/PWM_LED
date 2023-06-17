@@ -95,8 +95,8 @@ void setup() {
   green.off();
   blue.on();
   delay (500);
-  // set the brightness around 50%
-  brightness = 125;
+  // set the brightness around 25%
+  brightness = 64;
   Serial.println("setup() done!");
   delay(1000);            // wait one second  
   blue.off();             // turn BLUE off
@@ -122,6 +122,11 @@ void loop() {
   blue.flash(pattern, 6); // flash dot-dash-dot pattern on BLUE
   delay(5000);            // keep flashing for 5 seconds
   blue.off();             // turn BLUE off
+  // wait for the the blue LED state to become LED_OFF to avoid having multiple
+  // LEDs on.
+  while (blue.state()!=LED_OFF){
+    vTaskDelay(100/portTICK_PERIOD_MS);
+  }
   delay(pattern[0]*2);    // make sure the last dot has completed 
  
   // halve the brightness

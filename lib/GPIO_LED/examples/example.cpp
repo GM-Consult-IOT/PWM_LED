@@ -97,10 +97,12 @@ void setup() {
 
   // test the LED is working
   LED.on();              // turn on the LED
-  delay (2500);          // keep on for 2.5sec
-  brightness = 75;      // dim to 50%
-  delay(2500);           // wait one second  
+  delay (2500);          // keep on for 2.5 seconds
+  brightness = 64;       // dim to 25%
+  delay(2500);           // wait 2.5 seconds
   LED.off();             // turn LED off
+  
+  // debug message
   Serial.println("setup() done!");
 }
 
@@ -117,7 +119,12 @@ void loop() {
   delay(1000);            // wait one second
   LED.flash(pattern, 6); // flash dot-dash-dot pattern on LED
   delay(5000);            // keep flashing for 5 seconds
-  LED.off();             // turn LED off
+  LED.off();             // turn LED off  
+  
+  // wait for the the LED state to become LED_OFF 
+  while (LED.state() != LED_OFF){
+    vTaskDelay(100/portTICK_PERIOD_MS);
+  }
  
   // halve the brightness
   brightness = (int)((float)(brightness) / 2);

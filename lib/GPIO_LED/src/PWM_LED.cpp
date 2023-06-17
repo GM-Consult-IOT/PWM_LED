@@ -2,12 +2,27 @@
 * @file /*!
 * @file PWM_LED.h
 *
-* @mainpage Status LED interface for 400 Ocean Series Devices.
+* @mainpage This library provides an interface to control an LED connected 
+* to a GPIO pin using PWM.
 *
 * @section intro_sec_Introduction
 *
-* Firmware for the 400 Ocean Series devices. Please see README.md
-* for a full description.
+* This library provides an interface to control an LED connected to a GPIO 
+* pin using PWM. The principle of operation as as follows:
+* - the LED is controlled by writing a PWM signal to the specified GPIO pin 
+*   using the nominated PWM channel.
+* - the library calculates the PWM signal from the `brightness` value and 
+*   whether the `onState` of the LED is `HIGH` or `LOW`.
+* - in addition to the ability to turn the LED on or off, a flashing pattern 
+*   can be provided by calling the `flash(pattern, length)` method. The 
+*   pattern is a simple array sequence of milliSecond timings in which the 
+*   even-index elements (elements 0, 2, 4 ...) are the `on` periods and the 
+*   odd-index elements are the `off` periods in milliseconds. 
+*   The pattern length is limited to 255 elements.
+*
+* The PWM output is managed by a FreeRTOS task with a fairly low priority 
+* (task priority 10), which means the flashing of the LED runs asynchronously 
+* (non-blocking).
 * 
 * @section author Author
 * 
@@ -40,7 +55,8 @@ bool PWM_LED::begin(){
     ledcAttachPin(_GPIO, _PwmChannel);
     vTaskDelay(100/portTICK_PERIOD_MS);
     if (_createTask()){
-        off();
+        off();        
+        _ledState = LED_OFF;
         return true;        
     }
     return false;
@@ -68,7 +84,7 @@ LED_State PWM_LED::state(){
 
 void PWM_LED::on(){ 
     xSemaphoreTake(_flashSemaphore,  ( TickType_t ) 1);      
-    _flashPatternLength = 0;       
+    _flashPatternLength = 0;      
     flash(_onPattern,1);
     _ledState = LED_ON;
 };
@@ -76,7 +92,6 @@ void PWM_LED::on(){
 void PWM_LED::off(){  
     xSemaphoreTake(_flashSemaphore,  ( TickType_t ) 1);    
     _flashPatternLength = 0; 
-    _ledState = LED_OFF;
 }
 
 void PWM_LED::flash(uint16_t * pattern, uint8_t length){   
@@ -117,7 +132,8 @@ void PWM_LED::_flash(void){
                 Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
                 #endif // GPIO_LED_DEBUG    
             }            
-            ledcWrite(_PwmChannel,_dutyCycle(0));    
+            ledcWrite(_PwmChannel,_dutyCycle(0));                
+            _ledState = LED_OFF;
         }
         vTaskDelay(1/portTICK_PERIOD_MS);
     }
@@ -126,7 +142,6 @@ void PWM_LED::_flash(void){
 void PWM_LED::_flashTaskStatic(void* _this){
     static_cast<PWM_LED*>(_this)->_flash();
 };
-
 
 int PWM_LED::_dutyCycle(int brightness){
     return _onState == HIGH? brightness: GPIO_LED_PWM_MAX_DUTY_CYCLE - brightness;
