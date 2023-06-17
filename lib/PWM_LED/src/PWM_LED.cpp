@@ -51,7 +51,7 @@ PWM_LED::PWM_LED(uint8_t pin,
             _onState(bool(onState)){};
 
 bool PWM_LED::begin(){
-    ledcSetup(_PwmChannel, GPIO_LED_PWM_FREQ, GPIO_LED_PWM_RESOLUTION);
+    ledcSetup(_PwmChannel, PWM_LED_PWM_FREQ, PWM_LED_PWM_RESOLUTION);
     ledcAttachPin(_GPIO, _PwmChannel);
     vTaskDelay(100/portTICK_PERIOD_MS);
     if (_createTask()){
@@ -105,17 +105,17 @@ void PWM_LED::flash(uint16_t * pattern, uint8_t length){
 }
 
 void PWM_LED::_flash(void){
-    #ifdef GPIO_LED_DEBUG
+    #ifdef PWM_LED_DEBUG
     UBaseType_t uxHighWaterMark;
-    #endif // GPIO_LED_DEBUG    
+    #endif // PWM_LED_DEBUG    
     ledcWrite(_PwmChannel,_dutyCycle(0));
     uint8_t len;
     for (;;){   
-        #ifdef GPIO_LED_DEBUG
+        #ifdef PWM_LED_DEBUG
         /* Inspect our own high water mark on entering the task. */
         uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
         Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
-        #endif // GPIO_LED_DEBUG    
+        #endif // PWM_LED_DEBUG    
         if (xSemaphoreTake(_flashSemaphore, portMAX_DELAY)){
              len = _flashPatternLength;       
             while(_flashPatternLength > 0){
@@ -124,13 +124,13 @@ void PWM_LED::_flash(void){
                         i % 2 == 0? _dutyCycle(_brightness) :  _dutyCycle(0));                                     
                     vTaskDelay(_flashPattern[i]/portTICK_PERIOD_MS);
                 }
-                #ifdef GPIO_LED_DEBUG
+                #ifdef PWM_LED_DEBUG
                 /* Calling the function will have used some stack space, we would 
                 therefore now expect uxTaskGetStackHighWaterMark() to return a 
                 value lower than when it was called on entering the task. */
                 uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
                 Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
-                #endif // GPIO_LED_DEBUG    
+                #endif // PWM_LED_DEBUG    
             }            
             ledcWrite(_PwmChannel,_dutyCycle(0));                
             _ledState = LED_OFF;
@@ -144,5 +144,5 @@ void PWM_LED::_flashTaskStatic(void* _this){
 };
 
 int PWM_LED::_dutyCycle(int brightness){
-    return _onState == HIGH? brightness: GPIO_LED_PWM_MAX_DUTY_CYCLE - brightness;
+    return _onState == HIGH? brightness: PWM_LED_PWM_MAX_DUTY_CYCLE - brightness;
 };

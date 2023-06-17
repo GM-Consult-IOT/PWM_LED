@@ -20,7 +20,7 @@ The PWM output is managed by a FreeRTOS task with a fairly low priority (task pr
 
 ## Usage
 
-*The following example is also in the [examples folder](https://github.com/GM-Consult-IOT/PWM_LED/blob/main/lib/GPIO_LED/examples/example.cpp).*
+*The following example is also in the [examples folder](https://github.com/GM-Consult-IOT/PWM_LED/blob/main/lib/PWM_LED/examples/example.cpp).*
 
 This sketch demontrates how to control an LED using an instanceof the PWM_LED class. It also shows how changing the brightness and flashing pattern can be accomplished with very little effort.
 

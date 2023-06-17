@@ -1,12 +1,12 @@
 {
-    "name": "GPIO_LED",
+    "name": "PWM_LED",
     "version": "1.0.0",
     "description": "Control an LED using PWM on GPIO pin.",
     "keywords": "LED, GPIO, PWM, flash, brightness, FreeRTOS. non-blocking",
     "repository":
         {
             "type": "git",
-            "url": "https://github.com/GM-Consult-IOT/GPIO_LED.git"
+            "url": "https://github.com/GM-Consult-IOT/PWM_LED.git"
         },
     "authors":
         [
@@ -17,7 +17,7 @@
             }
         ],
     "license": "BSD-3-Clause",
-    "homepage": "https://github.com/GM-Consult-IOT/GPIO_LED",
+    "homepage": "https://github.com/GM-Consult-IOT/PWM_LED",
     "dependencies": [],
     "frameworks": "arduino",
     "platforms": "espressif32",

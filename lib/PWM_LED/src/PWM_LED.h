@@ -36,20 +36,20 @@
  * 
 */
 
-#ifndef __GPIO_LED_H__
-#define __GPIO_LED_H__
+#ifndef __PWM_LED_H__
+#define __PWM_LED_H__
 
 /// Uncomment to see debugging out put on [Serial].
-// #define GPIO_LED_DEBUG
+// #define PWM_LED_DEBUG
 
 #include <Arduino.h>
 #include <iostream>
 #include <algorithm>
 
-#define GPIO_LED_PWM_RESOLUTION 8     
-#define GPIO_LED_PWM_FREQ 100     
+#define PWM_LED_PWM_RESOLUTION 8     
+#define PWM_LED_PWM_FREQ 100     
 
-const uint16_t GPIO_LED_PWM_MAX_DUTY_CYCLE = pow(2, GPIO_LED_PWM_RESOLUTION) - 1;
+const uint16_t PWM_LED_PWM_MAX_DUTY_CYCLE = pow(2, PWM_LED_PWM_RESOLUTION) - 1;
 
 /// @brief Enumeration of LED color as combinations of red, green and blue
 /// expressed as 16-bit color values.
@@ -60,7 +60,7 @@ typedef enum LED_Color{
     COLOR_YELLOW = 0xff0,
     COLOR_MAGENTA = 0xf0f,
     COLOR_CYAN = 0x0ff,
-} GPIO_LED_color_t;
+} PWM_LED_color_t;
 
 /// @brief Enumeration of LED state.
 typedef enum LED_State{
@@ -179,4 +179,4 @@ class PWM_LED{
 };
 
 
-#endif // __GPIO_LED_H__
+#endif // __PWM_LED_H__
