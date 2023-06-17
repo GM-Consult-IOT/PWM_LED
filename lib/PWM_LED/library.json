@@ -20,5 +20,13 @@
     "homepage": "https://github.com/GM-Consult-IOT/GPIO_LED",
     "dependencies": [],
     "frameworks": "arduino",
-    "platforms": "espressif32"
+    "platforms": "espressif32",
+    "export": {
+        "include":
+        [
+            "dir/*.[ch]pp",
+            "dir/examples/*",
+            "*/*/*.h"
+        ]
+    }
   }
