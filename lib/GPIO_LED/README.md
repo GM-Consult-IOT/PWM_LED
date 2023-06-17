@@ -16,7 +16,7 @@ This library provides an interface to control an LED connected to a GPIO pin usi
 * the library calculates the PWM signal from the `brightness` value and whether the `onState` of the LED is `HIGH` or `LOW`.
 * in addition to the ability to turn the LED on or off, a flashing pattern can be provided by calling the `flash(pattern, length)` method. The pattern is a simple array sequence of millisecond timings in which the even-index elements (elements 0, 2, 4 ...) are the `on` periods and the odd-index elements are the `off` periods. The pattern length is limited to 255 elements.
 
-The PWM output is managed by a FreeRTOS task with a fairly low priority (task priority 10),so the flashing of the LED runs asynchronously (non-blocking). A PWM_LED task consumes 1,536 bytes of stack size.
+The PWM output is managed by a FreeRTOS task with a fairly low priority (task priority 10), so the flashing of the LED runs asynchronously (non-blocking). A PWM_LED task consumes 1,536 bytes of stack size.
 
 ## Usage
 
@@ -34,13 +34,13 @@ The hardware setup is as shown in [this tutorial](https://www.google.com/search?
 
 The PWM_LED instance is initialized in the `setup()` routine. To test the hardware, the LED is turned on for 2.5 seconds and then dimmed to about 25% for another 2.5 seconds.
 
-During the loop() task the LED is activated as follows: 
+During the `loop()` task the LED is activated as follows: 
 * the LED is turned on for 2 seconds and then turned off for a second; and
 * the LED is flashed in a dot-dash-dot (. - .) pattern for 5 seconds and then turned off.
 
-The brightness is halved at the end of every loop and rolls over at or below 1. 
+The brightness is halved at the end of every `loop()` and rolls over at or below 1. 
 
-The length of the first and last flash of the pattern is doubled at the end of every loop until they reach 2.5 seconds, at which point they reset to 10mS.
+The length of the first and last flash of the pattern is doubled at the end of every `loop()` until it reaches 2.5 seconds, at which point they reset to 10mS.
 
 ``` C++
 
