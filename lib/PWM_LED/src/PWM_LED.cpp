@@ -38,7 +38,7 @@
 
 #include "PWM_LED.h"
 
-#define TASK_STACK_SIZE 0x600
+#define TASK_STACK_SIZE 0x1000
 #define TASK_PRIORITY 10
 
 PWM_LED::PWM_LED(uint8_t pin, 
@@ -136,7 +136,7 @@ void PWM_LED::_flash(void){
                     therefore now expect uxTaskGetStackHighWaterMark() to return a 
                     value lower than when it was called on entering the task. */
                     uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-                    Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
+                    // Serial.printf("The highwatermark is at 0X%X\n", uxHighWaterMark);
                     #endif // PWM_LED_DEBUG    
                 }
             }            

@@ -6,13 +6,13 @@
 *
 * @section intro_sec_Introduction
 *
-* This sketch demontrates how to control an LED using the PWM_LED. It
-* also shows how changing the brightness and flashing pattern can be
+* This sketch demontrates how to control an LED using the PWM_LED class. 
+* It also shows how changing the brightness and flashing pattern can be
 * accomplished with very little effort.
 *
-* This sketch requires an LED connected to pin 27. The
+* This sketch requires an LED connected to pin 16. The
 * LED is associated with an instance of the PWM_LED class and
-* driven by PWM channel 3. The `brightness` is passed by reference 
+* driven by PWM channel 0. The `brightness` is passed by reference 
 * to the PWM_LED instance. Changing the value of 
 * `brightness` changes the brightness of the LED. Changing any element
 * of `pattern` changes the flashing pattern of the LED.
@@ -20,7 +20,10 @@
 * The hardware setup is as follows: 
 * - The LED cathode is connected to ground via a voltage limiting 
 *   resistor; and
-* - The LED anode is connected to GPIO 27.
+* - The LED anode is connected to GPIO 16.
+*
+* See [this tutorial](https://www.google.com/search?q=random+nerd+pwm&oq=random+nerd+pwm&aqs=edge..69i57j0i546j0i546i649j69i60l2.5334j0j1&sourceid=chrome&ie=UTF-8)
+* For a description of the hardware setup
 *
 * The PWM_LED instance is initialized in the `setup()` routine. To test 
 * the hardware, the LED is turned on for 1 second and then dimmed to 
