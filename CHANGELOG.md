@@ -1,6 +1,10 @@
 <!-- PWM_LED -->
 
 
+## 1.0.2
+
+* Increased stack size for LED task.
+
 ## 1.0.1+1
 
 * Updated examples.
